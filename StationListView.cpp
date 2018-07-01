@@ -1,7 +1,7 @@
-/* 
+/*
  * File:   StationListView.cpp
  * Author: user
- * 
+ *
  * Created on 26.02.2013, 09:22
  */
 #include <Application.h>
@@ -34,25 +34,25 @@ StationListViewItem::~StationListViewItem() {
 }
 
 StreamPlayer::PlayState
-StationListViewItem::State()  { 
-	return (fPlayer) ? 
-		fPlayer->State() 
-	: 
+StationListViewItem::State()  {
+	return (fPlayer) ?
+		fPlayer->State()
+	:
 		fStation->Flags(STATION_URI_VALID) ?
 			StreamPlayer::Stopped
 		:
 			StreamPlayer::InActive;
-}	
+}
 
 void StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete) {
 	int index = ((BListView*)owner)->IndexOf(this);
     StationListView* ownerList = (StationListView*)owner;
-    ownerList->SetHighColor(ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR : 
+    ownerList->SetHighColor(ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR :
 		((index % 2) ? B_MENU_BACKGROUND_COLOR : B_DOCUMENT_BACKGROUND_COLOR)));
     ownerList->FillRect(frame);
-    
+
     owner->SetHighColor(ui_color(IsSelected() ? B_MENU_SELECTED_ITEM_TEXT_COLOR : B_MENU_ITEM_TEXT_COLOR));
-    owner->SetLowColor(ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR : B_MENU_BACKGROUND_COLOR));
+    owner->SetLowColor(ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR : ((index % 2) ? B_MENU_BACKGROUND_COLOR : B_DOCUMENT_BACKGROUND_COLOR)));
     if (BBitmap* logo = fStation->Logo()) {
         BRect target(SLV_INSET, SLV_INSET, SLV_HEIGHT - 2 * SLV_INSET, SLV_HEIGHT - 2 * SLV_INSET);
 	target.OffsetBy(frame.LeftTop());
@@ -63,7 +63,7 @@ void StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete) {
     owner->GetFontHeight(&fontHeight);
     float baseline = SLV_INSET + fontHeight.ascent + fontHeight.leading;
     owner->DrawString(fStation->Name()->String(), frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, SLV_INSET + baseline));
-    
+
     owner->SetFontSize(SLV_SMALL_FONT_SIZE);
     owner->GetFontHeight(&fontHeight);
     baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
@@ -71,7 +71,7 @@ void StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete) {
     baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
 
     owner->DrawString(BString("") << fStation->BitRate()/1000.0 << " kbps " << fStation->Mime()->Type(), frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, baseline));
-    
+
     frame = ownerList->ItemFrame(ownerList->StationIndex(fStation));
     if (ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
         BBitmap* bnBitmap = getButtonBitmap(State());
@@ -81,7 +81,7 @@ void StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete) {
             owner->SetDrawingMode(B_OP_COPY);
         }
     }
-    
+
 }
 
 void StationListViewItem::DrawBufferFillBar(BView* owner, BRect frame) {
@@ -102,7 +102,7 @@ void StationListViewItem::Update(BView* owner, const BFont* font) {
     SetHeight(SLV_HEIGHT);
 }
 
-void 
+void
 StationListViewItem::StateChanged(StreamPlayer::PlayState newState) {
     if (fList && fList->LockLooperWithTimeout(0) == B_OK) {
         fList->InvalidateItem(fList->IndexOf(this));
@@ -110,17 +110,17 @@ StationListViewItem::StateChanged(StreamPlayer::PlayState newState) {
     }
 }
 
-BBitmap* 
+BBitmap*
 StationListViewItem::getButtonBitmap(StreamPlayer::PlayState state) {
     if (state < 0) return NULL;
-    if (buttonBitmap[state] == NULL) 
+    if (buttonBitmap[state] == NULL)
 		buttonBitmap[state] = Utils::ResourceBitmap(RES_BN_STOPPED + state);
     return buttonBitmap[state];
 }
 
 BBitmap* StationListViewItem::buttonBitmap[3] = { NULL, NULL, NULL };
 
-void 
+void
 StationListViewItem::SetFillRatio(float fillRatio) {
     fFillRatio = fillRatio;
     if (fList->LockLooperWithTimeout(0) == B_OK) {
@@ -131,7 +131,7 @@ StationListViewItem::SetFillRatio(float fillRatio) {
 }
 
 
-StationListView::StationListView(bool canPlay) 
+StationListView::StationListView(bool canPlay)
   : BListView("Stations", B_SINGLE_SELECTION_LIST),
 	fCanPlay(canPlay)
 {
@@ -144,7 +144,7 @@ StationListView::~StationListView() {
     delete playMsg;
 }
 
-bool 
+bool
 StationListView::AddItem(StationListViewItem* item) {
     item->fList = this;
     return BListView::AddItem(item);
@@ -190,7 +190,7 @@ void StationListView::Sync(StationsList* stations) {
             delete stationItem;
         }
     }
-    
+
     for (int32 i = 0; i < stations->CountItems(); i++) {
         Station* station = stations->ItemAt(i);
         if (Item(station) == NULL) {
